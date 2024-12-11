@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>White Noise Generator</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #121212;
+            color: #fff;
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #1e88e5;
+            color: #fff;
+        }
+
+        button:hover {
+            background-color: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>White Noise Generator</h1>
+        <button id="toggleNoise">Start Noise</button>
+    </div>
+
+    <script>
+        let audioContext;
+        let noiseSource;
+        let isPlaying = false;
+
+        // Function to create white noise
+        function createWhiteNoise() {
+            const bufferSize = 2 * audioContext.sampleRate; // Two seconds of audio
+            const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const data = buffer.getChannelData(0);
+
+            // Fill buffer with random values for white noise
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1; // Random value between -1 and 1
+            }
+
+            const noise = audioContext.createBufferSource();
+            noise.buffer = buffer;
+            noise.loop = true; // Loop the noise for continuous playback
+            return noise;
+        }
+
+        // Toggle noise playback
+        document.getElementById("toggleNoise").addEventListener("click", () => {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            if (isPlaying) {
+                // Stop the noise
+                noiseSource.stop();
+                noiseSource.disconnect();
+                isPlaying = false;
+                document.getElementById("toggleNoise").innerText = "Start Noise";
+            } else {
+                // Start the noise
+                noiseSource = createWhiteNoise();
+                noiseSource.connect(audioContext.destination);
+                noiseSource.start();
+                isPlaying = true;
+                document.getElementById("toggleNoise").innerText = "Stop Noise";
+            }
+        });
+    </script>
+</body>
+</html>
